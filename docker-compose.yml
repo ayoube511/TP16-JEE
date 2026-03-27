@@ -1,0 +1,45 @@
+version: '3.8'
+
+# ============================================
+# docker-compose.yml — TP8 Monitoring Stack
+# Spring Boot + Prometheus + Grafana
+# ============================================
+
+services:
+
+  # ===== Application Spring Boot =====
+  app:
+    image: tp8-monitoring:1.0
+    container_name: spring-monitoring
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+
+  # ===== Prometheus =====
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert-rules.yml:/etc/prometheus/alert-rules.yml
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  # ===== Grafana =====
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  grafana-data:

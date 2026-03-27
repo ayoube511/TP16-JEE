@@ -1,0 +1,37 @@
+# ============================================
+# alert-rules.yml — Règles d'alertes Prometheus
+# ============================================
+
+groups:
+  - name: spring-alerts
+    rules:
+
+      # Alerte si l'application est down
+      - alert: ApplicationDown
+        expr: up{job="spring-boot-app"} == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Application Spring Boot indisponible"
+          description: "L'application tp8-monitoring ne répond plus depuis 10 secondes."
+
+      # Alerte si la mémoire heap dépasse 500MB
+      - alert: HighHeapMemory
+        expr: jvm_memory_used_bytes{area="heap"} > 500000000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Utilisation mémoire élevée"
+          description: "La mémoire heap dépasse 500MB."
+
+      # Alerte si le nombre de requêtes est élevé
+      - alert: HighRequestRate
+        expr: rate(http_server_requests_seconds_count[1m]) > 100
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taux de requêtes élevé"
+          description: "Plus de 100 requêtes par minute."
